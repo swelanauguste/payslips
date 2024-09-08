@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% load month_name %}
+
+{% block content %}
+<div class="m-5 p-5 shadow rounded-4">
+<form method="GET" action="">
+
+<div class="row">
+  <h1>Payslips</h1>
+  <hr>
+  <!-- Form for filtering by year and month -->
+    <div class="col">
+        <label for="year">Select Year:</label>
+        <select name="year" id="year" onchange="this.form.submit()">
+          <option value="">-- Select Year --</option>
+          {% for year in years %}
+            <option value="{{ year.year }}" {% if selected_year == year.year|stringformat:"s" %}selected{% endif %}>
+              {{ year.year }}
+            </option>
+          {% endfor %}
+        </select>
+    </div>
+    <div class="col">
+        <label for="month">Select Month:</label>
+        <select name="month" id="month" onchange="this.form.submit()">
+          <option value="">-- Select Month --</option>
+          {% for month in months %}
+            <option value="{{ month.month }}" {% if selected_month == month.month|stringformat:"s" %}selected{% endif %}>
+              {{ month.month|month_name }}
+            </option>
+          {% endfor %}
+        </select>
+    </div>
+    <div class="text-end text-muted small">
+        <a class="text-muted" href="/">reset</a>
+    </div>
+</div>
+</form>
+<br>
+<hr>
+  <div>
+    <h3>Payslips List</h3>
+    {% if payslips %}
+      <ul>
+        {% for payslip in payslips %}
+          <li><a href="{% url 'generate-payslip-pdf' payslip.id %}">{{ payslip.date|date:'Y' }} - {{ payslip.date|date:'F' }}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No payslips found for the selected year or month.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
