@@ -36,8 +36,8 @@ def generate_payslip_pdf(request, payslip_id):
 @login_required
 def user_payslip_list(request):
     # Get distinct years from all payslips
-    all_payslips = Payslip.objects.filter(user=request.user)
-    years = all_payslips.annotate(year=ExtractYear("date")).values("year").distinct()
+    all_payslips = Payslip.objects.filter(user=request.user).order_by('-end_date')
+    years = all_payslips.annotate(year=ExtractYear("date")).order_by('-year').values("year").distinct()
 
     # Get year and month from query parameters
     year = request.GET.get("year")
@@ -48,14 +48,14 @@ def user_payslip_list(request):
     if year:
         filtered_payslips = filtered_payslips.annotate(year=ExtractYear("date")).filter(
             year=year
-        )
+        ).order_by("-year")
 
     # Filter the months based on the selected year
     months = []
     if year:
         months = (
             all_payslips.annotate(year=ExtractYear("date"), month=ExtractMonth("date"))
-            .filter(year=year)
+            .filter(year=year).order_by("-month")
             .values("month")
             .distinct()
         )
@@ -63,7 +63,7 @@ def user_payslip_list(request):
     if month:
         filtered_payslips = filtered_payslips.annotate(
             month=ExtractMonth("date")
-        ).filter(month=month)
+        ).filter(month=month).order_by("-year")
 
     return render(
         request,
